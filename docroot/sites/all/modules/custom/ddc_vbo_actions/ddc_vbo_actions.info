@@ -1,0 +1,5 @@
+name = Custom actions for VBO
+core = 7.x
+package = Deeson Developer Challenge
+dependencies[] = views
+dependencies[] = views_bulk_operations

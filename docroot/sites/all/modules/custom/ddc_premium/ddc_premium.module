@@ -1,0 +1,94 @@
+<?php
+/***
+ * DDC Article Permissions
+ * Implement premium Article Nodes
+ * A premium node should be displayed only for the authenticated users until certain date
+ * Afterwards, it should be displayed also to anonymous users
+ */
+
+
+/**
+ * Implements hook_node_access_records().
+ */
+function ddc_premium_node_access_records($node) {
+
+    $grants = array();
+
+    if (node_is_premium($node)) {
+        $grants[] = array(
+            // Say this node is in our realm.
+            // By convention we prefix the name of the realm
+            // with the module name.
+            'realm' => 'ddc_premium',
+            // Define the grant id - users in the realm must
+            // have this grant id to access this node.
+            'gid' => 1,
+            // Users who match can view the node.
+            'grant_view' => 1,
+            // Users who match cannot update the node.
+            'grant_update' => 0,
+            // Users who match cannot delete the node.
+            'grant_delete' => 0,
+            // In the case another module provides exactly
+            // this access record, the one with the highest
+            // priority wins. Usually leave this as 0.
+            'priority' => 0,
+        );
+    }
+
+    return $grants;
+}
+
+/**
+ * Check if the node is a premium node
+ * If node has the premium date set and the date is in the future return true
+ * Otherwise return false
+ * @param $node node to be checked
+ * @return bool is the node premium
+ */
+function node_is_premium($node) {
+
+    if ($node->type === 'article' && $node->field_premium){
+        $current_time = time();
+        $node_time = $node->field_premium['und'][0]['value'];
+        if ($current_time < $node_time) {
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
+/**
+ * Implements hook_node_grants().
+ */
+function ddc_premium_node_grants($account, $op) {
+
+    $grants = array();
+
+    if (user_is_logged_in($account)) {
+        // Within our realm users with the correct
+        // permission have a gid of 1.
+        $grants['ddc_premium'][] = array(1);
+    }
+
+    return $grants;
+}
+
+/**
+ * Implements hook_cron().
+ * This should run daily to rebuild the permissions
+ */
+function ddc_premium_cron()
+{
+    $cron_last = variable_get('ddc_premium_cron_run');
+    if ( $cron_last != date('dmy', time())) {
+        node_access_rebuild();
+        variable_set('ddc_premium_cron_run', date('dmy', time()));
+        watchdog('ddc_premium_cron','Premium articles permissions rebuilt');
+
+    } else {
+        watchdog('ddc_premium_cron','Premium articles permissions up to date');
+    }
+}
+?>

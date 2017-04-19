@@ -1,0 +1,5 @@
+name = DDC Premium Articles
+core = 7.x
+version = 1.0
+description = Handles user access to premium content
+package = Deeson Developer Challenge
