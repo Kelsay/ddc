@@ -4,25 +4,7 @@
  * Template file for article full view.
  */
 
-/*
- * Extract the author info from the related entity
- */
-$author = false;
-if ($node->field_author_type) {
-
-    $is_user = $node->field_author_type[LANGUAGE_NONE][0]['value'] == 1;
-
-    if ($is_user && $node->field_user) {
-        $author = $node->field_user[LANGUAGE_NONE][0]['entity'];
-    } else if (!$is_user && $node->field_author) {
-        $author = $node->field_author[LANGUAGE_NONE][0]['entity'];
-    }
-
-    if ($author) {
-        $author_image_src = image_style_url("author", $author->field_picture[LANGUAGE_NONE][0]['uri']);
-        $author_name = $is_user ? $author->name : $author->title;
-    }
-}
+$article = new ArticleEntityWrapper($node);
 
 ?>
 <article class="node-article-full <?php print $classes ?>" <?php print $attributes; ?>>
@@ -38,19 +20,18 @@ if ($node->field_author_type) {
     <section class="copy">
 
         <!-- Author info -->
-        <?php if($author): ?>
+        <?php if($article->hasAuthor()): ?>
             <div class="author col-md-6 pull-right ">
                 <div class="panel panel-default">
                     <div class="name panel-heading">
-                        Author: <b><?php echo $author_name; ?></b>
+                        Author: <b><?php echo $article->getAuthorName(); ?></b>
                     </div>
 
                     <div class="panel-body">
-                        <?php if($author_image_src): ?>
-                        <img class="image pull-left"
-                             src="<?php echo $author_image_src; ?>">
-                        <?php print substr($author->field_bio[LANGUAGE_NONE][0]['value'], 0,200); ?>
+                        <?php if ($article->getAuthorPicture()): ?>
+                            <img class="image pull-left" src="<?php echo $article->getAuthorPicture(); ?>">
                         <?php endif; ?>
+                        <?php print $article->getAuthorBio(); ?>
                     </div>
 
                 </div>

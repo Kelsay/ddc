@@ -1,0 +1,4 @@
+name = Entity wrappers
+core = 7.x
+package = Deeson Developer Challenge
+files[] = article_entity_wrapper.inc
